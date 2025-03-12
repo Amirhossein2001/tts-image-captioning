@@ -7,6 +7,8 @@ from models.tts_model import text_to_speech
 from PIL import Image
 import io
 import traceback
+import uuid  # برای تولید شناسه‌های منحصر به فرد
+from datetime import datetime  # برای اضافه کردن تاریخ و زمان به نام فایل
 
 # تنظیم مسیر صحیح برای `templates` و `static`
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -65,8 +67,9 @@ def caption_image():
         final_text = f"Image captioning content: {caption}. And OCR content: {extracted_text}."
         print(f"📌 متن نهایی برای TTS: {final_text}")
 
-        # مسیر ذخیره فایل صوتی
-        audio_path = os.path.join(STATIC_DIR, "output.wav")
+        # تولید یک شناسه منحصر به فرد برای نام فایل صوتی
+        unique_filename = f"{uuid.uuid4().hex}.wav"
+        audio_path = os.path.join(STATIC_DIR, unique_filename)
 
         # تبدیل متن به گفتار و ذخیره فایل صوتی
         print("📌 در حال اجرای TTS...")
@@ -81,7 +84,7 @@ def caption_image():
         return jsonify({
             'caption': caption,
             'ocr_text': extracted_text,
-            'audio_url': "/static/output.wav"
+            'audio_url': f"/static/{unique_filename}"
         })
 
     except Exception as e:
@@ -99,8 +102,9 @@ def text_to_speech_api():
     try:
         print(f"📌 تبدیل متن به گفتار: {text}")
 
-        # مسیر ذخیره فایل صوتی
-        audio_path = os.path.join(STATIC_DIR, "tts_output.wav")
+        # تولید یک شناسه منحصر به فرد برای نام فایل صوتی
+        unique_filename = f"{uuid.uuid4().hex}.wav"
+        audio_path = os.path.join(STATIC_DIR, unique_filename)
 
         # تبدیل متن به گفتار و ذخیره فایل صوتی
         generated_audio = text_to_speech(text, output_path=audio_path)
@@ -111,7 +115,7 @@ def text_to_speech_api():
 
         print(f"✅ فایل صوتی ذخیره شده در: {audio_path}")
 
-        return jsonify({'audio_url': "/static/tts_output.wav"})
+        return jsonify({'audio_url': f"/static/{unique_filename}"})
 
     except Exception as e:
         print("❌ خطا در سرور:")
